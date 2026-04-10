@@ -69,9 +69,8 @@ body{
 }
 .hero-inner{
   width:100%;max-width:1280px;margin:0 auto;
-  display:grid;grid-template-columns:1fr 340px;
-  gap:clamp(2rem,4vw,5rem);align-items:start;
-  padding-top:4rem;
+  display:grid;grid-template-columns:1fr 380px;
+  gap:clamp(3rem,5vw,6rem);align-items:center;
 }
 .hero-label{
   font-family:var(--mono);font-size:.62rem;font-weight:500;
@@ -99,31 +98,29 @@ body{
 }
 .hero-sub strong{font-weight:500;font-style:normal;color:var(--ink)}
 
-/* metrics strip */
-.metrics{
-  display:grid;grid-template-columns:repeat(4,1fr);
-  gap:0;border:1px solid var(--line2);border-radius:12px;
-  overflow:hidden;margin-bottom:2rem;max-width:520px;
-}
-.m-cell{
-  padding:1.1rem;text-align:center;
-  border-right:1px solid var(--line);
-  background:var(--bg);transition:background .3s;
-}
-.m-cell:last-child{border-right:none}
-.m-cell:hover{background:var(--bg2)}
-.m-val{
-  font-family:var(--display);font-size:1.7rem;font-weight:700;
+/* metrics - standalone in strip */
+.m-cell-standalone{text-align:center}
+.m-cell-standalone .m-val{
+  font-family:var(--display);font-size:2rem;font-weight:700;
   color:var(--ink);letter-spacing:-.03em;
 }
-.m-label{
+.m-cell-standalone .m-label{
   font-family:var(--mono);font-size:.55rem;font-weight:400;
   color:var(--sub);text-transform:uppercase;letter-spacing:.12em;
-  margin-top:.25rem;
+  margin-top:.3rem;
 }
 
-/* contribution graph */
-.contrib-wrap{margin-bottom:2.5rem;max-width:520px}
+/* contribution graph - full width strip */
+.contrib-strip{
+  padding:3rem clamp(1.5rem,4vw,4rem);
+  background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+}
+.contrib-strip-inner{
+  max-width:1280px;margin:0 auto;
+  display:grid;grid-template-columns:repeat(4,1fr) 2fr;
+  gap:2rem;align-items:center;
+}
+.contrib-wrap{}
 .contrib-label{
   font-family:var(--mono);font-size:.55rem;font-weight:500;
   color:var(--sub);letter-spacing:.12em;text-transform:uppercase;
@@ -174,7 +171,7 @@ body{
 .btn-secondary:hover{border-color:var(--sub);color:var(--ink);background:var(--bg2)}
 
 /* hero photo */
-.hero-photo{position:relative;position:sticky;top:6rem}
+.hero-photo{position:relative}
 .hero-img-wrap{
   position:relative;border-radius:16px;overflow:hidden;
   box-shadow:0 8px 40px rgba(26,23,20,.08),0 1px 3px rgba(26,23,20,.06);
@@ -396,6 +393,7 @@ body{
 @media(max-width:1024px){
   .hero-inner{grid-template-columns:1fr}
   .hero-photo{max-width:340px;margin:0 auto;order:-1}
+  .contrib-strip-inner{grid-template-columns:repeat(2,1fr)!important;gap:1.5rem}
   .about-cols{grid-template-columns:1fr}
   .about-aside{position:static;margin-top:1.5rem}
   .ag-row{grid-template-columns:48px 1fr;gap:.75rem}
@@ -439,19 +437,6 @@ body{
         across fintech, e-commerce, and trading. Now engineering autonomous AI systems
         and low-latency infrastructure that <strong>thinks, executes, and improves itself.</strong>
       </p>
-      <div class="metrics">
-        <div class="m-cell"><div class="m-val">20+</div><div class="m-label">Years</div></div>
-        <div class="m-cell"><div class="m-val">7</div><div class="m-label">Exits</div></div>
-        <div class="m-cell"><div class="m-val">5,500+</div><div class="m-label">Commits / yr</div></div>
-        <div class="m-cell"><div class="m-val">50+</div><div class="m-label">Projects</div></div>
-      </div>
-      <div class="contrib-wrap" id="contrib">
-        <div class="contrib-label">
-          <span>26 weeks of contributions</span>
-          <span class="total">5,500+ this year</span>
-        </div>
-        <div class="contrib-graph" id="contribGraph"></div>
-      </div>
       <div class="hero-cta">
         <a href="mailto:arunprasath2005@gmail.com" class="btn btn-primary">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -473,6 +458,22 @@ body{
     </div>
   </div>
 </section>
+
+<!-- METRICS + CONTRIBUTION STRIP -->
+<div class="contrib-strip">
+  <div class="contrib-strip-inner">
+    <div class="m-cell-standalone"><div class="m-val">20+</div><div class="m-label">Years</div></div>
+    <div class="m-cell-standalone"><div class="m-val">7</div><div class="m-label">Exits</div></div>
+    <div class="m-cell-standalone"><div class="m-val">5,500+</div><div class="m-label">Commits / yr</div></div>
+    <div class="m-cell-standalone"><div class="m-val">50+</div><div class="m-label">Projects</div></div>
+    <div class="contrib-wrap" id="contrib">
+      <div class="contrib-label">
+        <span>26 weeks of contributions</span>
+      </div>
+      <div class="contrib-graph" id="contribGraph"></div>
+    </div>
+  </div>
+</div>
 
 <div class="rule"></div>
 
