@@ -415,14 +415,12 @@ body{
 /* ---- RESPONSIVE ---- */
 @media(max-width:1024px){
   .hero{min-height:auto;padding-top:5rem;padding-bottom:3rem}
-  .hero-inner{grid-template-columns:1fr;gap:2.5rem}
-  .hero-photo{max-width:300px;margin:0 auto;order:-1}
+  .hero-inner{grid-template-columns:1fr 200px;gap:2rem}
+  .hero-photo{max-width:200px}
   .hero-photo::after{display:none}
-  .hero-left{text-align:center}
-  .hero-sub{margin-left:auto;margin-right:auto}
-  .hero-cta{justify-content:center}
-  .hero-photo-name,.hero-photo-title{text-align:center}
-  .hero-name{justify-content:center}
+  .hero-img{aspect-ratio:1/1;border-radius:50%}
+  .hero-img-wrap{border-radius:50%;box-shadow:0 4px 20px rgba(26,23,20,.08)}
+  .hero-photo-name,.hero-photo-title{font-size:.7rem;margin-top:1rem}
   .contrib-strip{padding:2rem clamp(1.5rem,4vw,4rem)}
   .contrib-graph{gap:3px}
   .about-cols{grid-template-columns:1fr;gap:2rem}
