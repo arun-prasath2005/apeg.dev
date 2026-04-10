@@ -125,9 +125,11 @@ body{
   gap:2rem;align-items:center;
 }
 .contrib-wrap{}
+.contrib-label .total{color:var(--ink);font-weight:500}
 .contrib-label{
   font-family:var(--mono);font-size:.55rem;font-weight:500;
   color:var(--sub);letter-spacing:.12em;text-transform:uppercase;
+  display:flex;justify-content:space-between;
   margin-bottom:.75rem;
   display:flex;align-items:center;justify-content:space-between;
 }
@@ -136,7 +138,7 @@ body{
   display:grid;
   grid-template-columns:repeat(26,1fr);
   grid-template-rows:repeat(7,1fr);
-  gap:3px;
+  gap:4px;
   grid-auto-flow:column;
 }
 .contrib-cell{
@@ -468,14 +470,11 @@ body{
 
 <!-- METRICS + CONTRIBUTION STRIP -->
 <div class="contrib-strip">
-  <div class="contrib-strip-inner">
-    <div class="m-cell-standalone"><div class="m-val">20+</div><div class="m-label">Years</div></div>
-    <div class="m-cell-standalone"><div class="m-val">7</div><div class="m-label">Exits</div></div>
-    <div class="m-cell-standalone"><div class="m-val">5,500+</div><div class="m-label">Commits / yr</div></div>
-    <div class="m-cell-standalone"><div class="m-val">50+</div><div class="m-label">Projects</div></div>
+  <div class="contrib-strip-inner" style="display:block;max-width:1280px;margin:0 auto">
     <div class="contrib-wrap" id="contrib">
       <div class="contrib-label">
         <span>26 weeks of contributions</span>
+        <span class="total">5,500+ this year</span>
       </div>
       <div class="contrib-graph" id="contribGraph"></div>
     </div>
