@@ -2,8 +2,8 @@ name: Update Contribution Graph
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # daily at 6am UTC
-  workflow_dispatch: # manual trigger
+    - cron: '0 6 * * *'
+  workflow_dispatch:
 
 jobs:
   update:
@@ -17,36 +17,33 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.CONTRIB_TOKEN }}
         run: |
-          # Calculate date range (last 26 weeks)
           END_DATE=$(date -u +%Y-%m-%dT23:59:59Z)
           START_DATE=$(date -u -d '26 weeks ago' +%Y-%m-%dT00:00:00Z)
 
-          # Fetch from GitHub GraphQL API
-          QUERY='{ user(login: "arun-prasath2005") { contributionsCollection(from: "'$START_DATE'", to: "'$END_DATE'") { contributionCalendar { totalContributions weeks { contributionDays { contributionCount } } } } } }'
+          QUERY='{ user(login: "arun-prasath2005") { contributionsCollection(from: "'$START_DATE'", to: "'$END_DATE'") { contributionCalendar { totalContributions weeks { contributionDays { contributionCount date } } } } } }'
 
           RESPONSE=$(curl -s -H "Authorization: bearer $GH_TOKEN" \
             -H "Content-Type: application/json" \
             -d "{\"query\": \"$(echo $QUERY | sed 's/"/\\"/g')\"}" \
             https://api.github.com/graphql)
 
-          # Extract contribution counts as JS array
-          DATA=$(echo "$RESPONSE" | jq -r '[.data.user.contributionsCollection.contributionCalendar.weeks[-26:][] | .contributionDays[] | .contributionCount] | join(",")')
-
-          # Get total contributions for the year
+          COUNTS=$(echo "$RESPONSE" | jq -r '[.data.user.contributionsCollection.contributionCalendar.weeks[-26:][] | .contributionDays[] | .contributionCount] | join(",")')
+          DATES=$(echo "$RESPONSE" | jq -r '[.data.user.contributionsCollection.contributionCalendar.weeks[-26:][] | .contributionDays[] | .date] | map("\"" + . + "\"") | join(",")')
           TOTAL=$(echo "$RESPONSE" | jq -r '.data.user.contributionsCollection.contributionCalendar.totalContributions')
 
           echo "Fetched $TOTAL contributions"
-          echo "DATA=$DATA" >> $GITHUB_ENV
+          echo "COUNTS=$COUNTS" >> $GITHUB_ENV
+          echo "DATES=$DATES" >> $GITHUB_ENV
           echo "TOTAL=$TOTAL" >> $GITHUB_ENV
 
       - name: Update index.html
         run: |
-          # Replace the data array in the JS
-          sed -i "s/const data=\[.*\];/const data=[$DATA];/" index.html
+          TOTAL_FMT=$(printf "%'d" $TOTAL)
 
-          # Update the total count
-          TOTAL_FORMATTED=$(printf "%'d" $TOTAL)
-          sed -i "s/<span class=\"total\">.*<\/span>/<span class=\"total\">${TOTAL_FORMATTED}+ this year<\/span>/" index.html
+          sed -i "s/const data=\[.*\];/const data=[$COUNTS];/" index.html
+          sed -i "s/const dates=\[.*\];/const dates=[$DATES];/" index.html
+          sed -i "s/[0-9,]* contributions this year/${TOTAL_FMT} contributions this year/g" index.html
+          sed -i "s/[0-9,]* this year\"/${TOTAL_FMT} this year\"/g" index.html
 
       - name: Commit and push if changed
         run: |
