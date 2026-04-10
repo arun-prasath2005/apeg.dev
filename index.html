@@ -198,7 +198,7 @@ body{
 .spec-icon.slm{background:rgba(180,140,60,.08);color:#8a6d20}
 .spec-icon.defi{background:rgba(100,60,180,.06);color:#6a40b0}
 .spec-icon.saas{background:rgba(26,23,20,.04);color:var(--ink)}
-.spec-icon.sec{background:rgba(179,74,47,.06);color:#a04030}
+.spec-icon.safe{background:rgba(179,74,47,.06);color:#a04030;width:40px;height:40px;min-width:40px;max-width:40px;min-height:40px;max-height:40px}
 .spec-card-title{
   font-family:var(--display);font-size:.88rem;font-weight:700;
   letter-spacing:-.01em;margin-bottom:.35rem;
@@ -580,6 +580,7 @@ body{
 <nav class="nav">
   <a href="#" class="nav-mark"><svg viewBox="0 0 200 48" width="110" height="28"><text x="0" y="38" font-family="'Bricolage Grotesque',sans-serif" font-weight="800" font-size="42" letter-spacing="-2" fill="#1a1714">ap<tspan fill="#b34a2f">eg</tspan></text></svg></a>
   <div class="nav-links">
+    <a href="#specializations">Specializations</a>
     <a href="#about">About</a>
     <a href="#agents">Agents</a>
     <a href="#systems">Systems</a>
@@ -623,7 +624,7 @@ body{
 </section>
 
 <!-- SPECIALIZATIONS -->
-<div class="spec-strip">
+<div class="spec-strip" id="specializations">
   <div class="spec-inner">
     <div class="spec-label">Specializations</div>
     <div class="spec-grid">
@@ -648,7 +649,7 @@ body{
         <div class="spec-card-desc">Flash loans, Flashbots bundles, Dutch auctions, builder economics</div>
       </div>
       <div class="spec-card">
-        <div class="spec-icon sec">GD</div>
+        <div class="spec-icon safe">GD</div>
         <div class="spec-card-title">AI Safety</div>
         <div class="spec-card-desc">Prompt injection detection, hallucination guards, loop detection</div>
       </div>
