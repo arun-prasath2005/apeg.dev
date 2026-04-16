@@ -18,17 +18,20 @@ jobs:
           GH_TOKEN: ${{ secrets.CONTRIB_TOKEN }}
         run: |
           END_DATE=$(date -u +%Y-%m-%dT23:59:59Z)
-          START_DATE=$(date -u -d '26 weeks ago' +%Y-%m-%dT00:00:00Z)
+          YEAR_START=$(date -u -d '1 year ago' +%Y-%m-%dT00:00:00Z)
 
-          QUERY='{ user(login: "arun-prasath2005") { contributionsCollection(from: "'$START_DATE'", to: "'$END_DATE'") { contributionCalendar { totalContributions weeks { contributionDays { contributionCount date } } } } } }'
+          # Fetch full year for total and graph (52 weeks)
+          QUERY='{ user(login: "arun-prasath2005") { contributionsCollection(from: "'$YEAR_START'", to: "'$END_DATE'") { contributionCalendar { totalContributions weeks { contributionDays { contributionCount date } } } } } }'
 
           RESPONSE=$(curl -s -H "Authorization: bearer $GH_TOKEN" \
             -H "Content-Type: application/json" \
             -d "{\"query\": \"$(echo $QUERY | sed 's/"/\\"/g')\"}" \
             https://api.github.com/graphql)
 
-          COUNTS=$(echo "$RESPONSE" | jq -r '[.data.user.contributionsCollection.contributionCalendar.weeks[-26:][] | .contributionDays[] | .contributionCount] | join(",")')
-          DATES=$(echo "$RESPONSE" | jq -r '[.data.user.contributionsCollection.contributionCalendar.weeks[-26:][] | .contributionDays[] | .date] | map("\"" + . + "\"") | join(",")')
+          # Graph: full year (52 weeks)
+          COUNTS=$(echo "$RESPONSE" | jq -r '[.data.user.contributionsCollection.contributionCalendar.weeks[-52:][] | .contributionDays[] | .contributionCount] | join(",")')
+          DATES=$(echo "$RESPONSE" | jq -r '[.data.user.contributionsCollection.contributionCalendar.weeks[-52:][] | .contributionDays[] | .date] | map("\"" + . + "\"") | join(",")')
+          # Total: full year
           TOTAL=$(echo "$RESPONSE" | jq -r '.data.user.contributionsCollection.contributionCalendar.totalContributions')
 
           echo "Fetched $TOTAL contributions"

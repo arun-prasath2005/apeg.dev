@@ -230,9 +230,9 @@ body{
 .contrib-label .total{color:var(--ink);font-weight:500}
 .contrib-graph{
   display:grid;
-  grid-template-columns:repeat(26,1fr);
+  grid-template-columns:repeat(52,1fr);
   grid-template-rows:repeat(7,1fr);
-  gap:4px;
+  gap:2px;
   grid-auto-flow:column;
 }
 .contrib-cell{
@@ -571,7 +571,7 @@ body{
 @media(max-width:380px){
   .hero h1{font-size:1.8rem}
   .hero-photo{max-width:200px}
-  .contrib-graph{grid-template-columns:repeat(26,1fr);gap:1.5px}
+  .contrib-graph{grid-template-columns:repeat(52,1fr);gap:1.5px}
 }
 </style>
 </head>
@@ -688,7 +688,7 @@ body{
   <div class="contrib-strip-inner" style="display:block;max-width:1280px;margin:0 auto">
     <div class="contrib-wrap" id="contrib">
       <div class="contrib-label">
-        <span>26 weeks of contributions</span>
+        <span>52 weeks of contributions</span>
         <span class="total">5,599 this year</span>
       </div>
       <div class="contrib-graph" id="contribGraph"></div>
