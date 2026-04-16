@@ -41,12 +41,12 @@ jobs:
 
       - name: Update index.html
         run: |
-          TOTAL_FMT=$(printf "%'d" $TOTAL)
+          # Format with comma (e.g. 5888 -> 5,888)
+          TOTAL_FMT=$(echo $TOTAL | sed ':a;s/\B[0-9]\{3\}\>/,&/;ta')
 
           sed -i "s/const data=\[.*\];/const data=[$COUNTS];/" index.html
           sed -i "s/const dates=\[.*\];/const dates=[$DATES];/" index.html
-          sed -i "s/[0-9,]* contributions this year/${TOTAL_FMT} contributions this year/g" index.html
-          sed -i "s/[0-9,]* this year\"/${TOTAL_FMT} this year\"/g" index.html
+          sed -i "s/[0-9,]\+ this year\"/${TOTAL_FMT} this year\"/g" index.html
 
       - name: Commit and push if changed
         run: |
