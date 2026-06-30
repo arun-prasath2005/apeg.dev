@@ -2,9 +2,10 @@
    Direction: "international typographic" / Swiss — paper, true black, one signal red.
    Change values here and every page that links this file updates at once. */
 :root{
-  --bg:#fcfcfc;          /* near-white */
-  --bg2:#f2f2f0;         /* surface */
-  --bg3:#e8e8e5;         /* deeper surface */
+  --bg:#e6e9ed;          /* cool grey-blue paper */
+  --bg2:#dde1e5;         /* surface */
+  --bg3:#d2d7db;         /* deeper surface */
+  --nav-bg:rgba(230,233,237,.85);  /* translucent nav (matches --bg) */
   --ink:#111111;         /* true near-black */
   --ink2:#2a2a26;
   --text:#3a3a35;
