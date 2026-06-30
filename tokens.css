@@ -21,5 +21,6 @@
   --display:'Helvetica Neue',Helvetica,Arial,sans-serif;
   --body:'Helvetica Neue',Helvetica,Arial,sans-serif;
   --mono:'JetBrains Mono','IBM Plex Mono',monospace;
+  --label:var(--body);   /* chart labels / eyebrow / captions — sans, not mono */
 }
 ::selection{background:var(--accent);color:#fff}
