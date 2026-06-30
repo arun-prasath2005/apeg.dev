@@ -1,0 +1,24 @@
+/* apeg.dev — design tokens (single source of truth for the whole site).
+   Direction: "international typographic" / Swiss — paper, true black, one signal red.
+   Change values here and every page that links this file updates at once. */
+:root{
+  --bg:#fcfcfc;          /* near-white */
+  --bg2:#f2f2f0;         /* surface */
+  --bg3:#e8e8e5;         /* deeper surface */
+  --ink:#111111;         /* true near-black */
+  --ink2:#2a2a26;
+  --text:#3a3a35;
+  --sub:#6e6c64;
+  --light:#a3a096;
+  --line:rgba(17,17,17,.10);
+  --line2:rgba(17,17,17,.20);
+  --accent:#e1261c;      /* signal red — the one color */
+  --accent2:#b81d14;
+  --accent-bg:rgba(225,38,28,.06);
+  --teal:#2a2a26;        /* secondary slot kept monochrome (Swiss = one accent only) */
+  --teal-bg:rgba(17,17,17,.05);
+  --display:'Helvetica Neue',Helvetica,Arial,sans-serif;
+  --body:'Helvetica Neue',Helvetica,Arial,sans-serif;
+  --mono:'JetBrains Mono','IBM Plex Mono',monospace;
+}
+::selection{background:var(--accent);color:#fff}

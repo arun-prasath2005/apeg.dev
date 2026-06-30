@@ -29,7 +29,7 @@
 <!-- Favicon -->
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="https://avatars.githubusercontent.com/u/84761066?v=4&s=32">
-<meta name="theme-color" content="#f6f3ed">
+<meta name="theme-color" content="#fcfcfc">
 
 <!-- Structured Data -->
 <script type="application/ld+json">
@@ -53,30 +53,12 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200;12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,200;0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400;1,6..72,500&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 
-:root{
-  --bg:#f6f3ed;
-  --bg2:#eee9e0;
-  --bg3:#e4ded4;
-  --ink:#1a1714;
-  --ink2:#302b24;
-  --text:#4a453c;
-  --sub:#7d776c;
-  --light:#a8a296;
-  --line:rgba(26,23,20,.08);
-  --line2:rgba(26,23,20,.14);
-  --accent:#b34a2f;
-  --accent2:#d45a3a;
-  --accent-bg:rgba(179,74,47,.06);
-  --teal:#2a6f6a;
-  --teal-bg:rgba(42,111,106,.06);
-  --display:'Bricolage Grotesque',sans-serif;
-  --body:'Newsreader',Georgia,serif;
-  --mono:'IBM Plex Mono',monospace;
-}
+/* design tokens live in tokens.css (single source of truth for the whole site) */
 
 html{scroll-behavior:smooth}
 body{
@@ -91,7 +73,7 @@ body{
   position:fixed;top:0;left:0;right:0;z-index:100;
   padding:0 clamp(1.5rem,4vw,4rem);height:64px;
   display:flex;align-items:center;justify-content:space-between;
-  background:rgba(246,243,237,.9);
+  background:rgba(252,252,252,.85);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border-bottom:1px solid var(--line);
 }
@@ -193,12 +175,12 @@ body{
   font-size:.8rem;font-weight:700;
   font-family:var(--mono);margin-bottom:1rem;
 }
-.spec-icon.ai{background:rgba(179,74,47,.08);color:var(--accent)}
-.spec-icon.rt{background:rgba(42,111,106,.06);color:var(--teal)}
+.spec-icon.ai{background:rgba(225,38,28,.08);color:var(--accent)}
+.spec-icon.rt{background:rgba(17,17,17,.05);color:var(--teal)}
 .spec-icon.slm{background:rgba(180,140,60,.08);color:#8a6d20}
 .spec-icon.defi{background:rgba(100,60,180,.06);color:#6a40b0}
 .spec-icon.saas{background:rgba(26,23,20,.04);color:var(--ink)}
-.spec-icon.safe{background:rgba(179,74,47,.06);color:#a04030;width:40px;height:40px;min-width:40px;max-width:40px;min-height:40px;max-height:40px}
+.spec-icon.safe{background:rgba(225,38,28,.06);color:var(--accent2);width:40px;height:40px;min-width:40px;max-width:40px;min-height:40px;max-height:40px}
 .spec-card-title{
   font-family:var(--display);font-size:.88rem;font-weight:700;
   letter-spacing:-.01em;margin-bottom:.35rem;
@@ -366,7 +348,7 @@ body{
   cursor:default;
 }
 .ag-row:first-child{border-top:1px solid var(--line)}
-.ag-row:hover{padding-left:1.25rem;background:rgba(179,74,47,.015)}
+.ag-row:hover{padding-left:1.25rem;background:rgba(225,38,28,.02)}
 .ag-row:hover .ag-n{color:var(--accent)}
 .ag-n{
   font-family:var(--display);font-size:1.5rem;font-weight:300;
@@ -585,6 +567,7 @@ body{
     <a href="#agents">Agents</a>
     <a href="#systems">Systems</a>
     <a href="#stack">Stack</a>
+    <a href="/writing/running-gemma4-26b-on-a-cpu/">Writing</a>
     <a href="#contact">Contact</a>
   </div>
 </nav>

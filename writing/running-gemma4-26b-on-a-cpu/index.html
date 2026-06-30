@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Running Gemma-4 26B at 124 tokens/sec on a CPU, no GPU &mdash; Arun Prasath E G</title>
+<meta name="description" content="A 26B mixture-of-experts model on a desktop CPU with no graphics card: ~40 tokens/sec single-stream lossless, ~124 batched. The recipe, the byte budget, and where the walls actually are.">
+<meta name="author" content="Arun Prasath E G">
+<link rel="canonical" href="https://apeg.dev/writing/running-gemma4-26b-on-a-cpu/">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://apeg.dev/writing/running-gemma4-26b-on-a-cpu/">
+<meta property="og:title" content="Running Gemma-4 26B at 124 tokens/sec on a CPU, no GPU">
+<meta property="og:description" content="A 26B MoE on a desktop CPU, no GPU. The recipe, the byte budget, the dead-ends.">
+<meta property="og:site_name" content="Arun Prasath E G">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Running Gemma-4 26B at 124 tokens/sec on a CPU, no GPU">
+<meta name="twitter:description" content="A 26B MoE on a desktop CPU, no GPU. The recipe, the byte budget, the dead-ends.">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle","headline":"Running Gemma-4 26B at 124 tokens/sec on a CPU, no GPU","description":"A 26B mixture-of-experts model on a desktop CPU with no graphics card: ~40 tokens/sec single-stream lossless, ~124 batched.","author":{"@type":"Person","name":"Arun Prasath E G","url":"https://apeg.dev"},"datePublished":"2026-06-30","url":"https://apeg.dev/writing/running-gemma4-26b-on-a-cpu/"}
+</script>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="theme-color" content="#fcfcfc">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../tokens.css">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--body);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;font-size:17px;line-height:1.62}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(179,74,47,.28);transition:border-color .2s}
+a:hover{border-color:var(--accent)}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;height:64px;padding:0 clamp(1.5rem,4vw,4rem);
+  display:flex;align-items:center;justify-content:space-between;background:rgba(252,252,252,.85);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.nav-mark{display:flex;align-items:center;border:none}
+.nav-links{display:flex;gap:.25rem}
+.nav-links a{font-family:var(--mono);font-size:.68rem;color:var(--sub);border:none;padding:.4rem .8rem;border-radius:6px;transition:all .25s}
+.nav-links a:hover{color:var(--ink);background:var(--line)}
+@media(max-width:640px){.nav-links{display:none}}
+.wrap{max-width:716px;margin:0 auto;padding:0 clamp(1.5rem,5vw,2rem)}
+header.post{padding:8.5rem 0 2rem}
+.eyebrow{font-family:var(--mono);font-size:.6rem;font-weight:500;color:var(--accent);letter-spacing:.16em;text-transform:uppercase;margin-bottom:1.4rem}
+h1.title{font-family:var(--display);font-weight:800;font-size:clamp(2.1rem,5vw,3.1rem);line-height:1.04;letter-spacing:-.035em;color:var(--ink);margin-bottom:1.3rem}
+.deck{font-weight:400;font-size:1.15rem;line-height:1.5;color:var(--text);max-width:48ch}
+.byline{font-family:var(--mono);font-size:.64rem;color:var(--sub);letter-spacing:.08em;text-transform:uppercase;margin-top:1.5rem}
+article{padding-bottom:4rem}
+article p{margin:0 0 1.35rem}
+article h2{font-family:var(--display);font-weight:700;font-size:1.6rem;letter-spacing:-.02em;color:var(--ink);margin:3.2rem 0 1.1rem;line-height:1.15}
+article strong{font-weight:500;color:var(--ink)}article em{color:var(--ink2)}
+.lead{font-size:1.06em}
+.eq{font-family:var(--mono);font-size:.92rem;color:var(--ink2);background:var(--accent-bg);border-left:2px solid var(--accent);border-radius:0 8px 8px 0;padding:1.1rem 1.3rem;margin:1.6rem 0;line-height:1.5}
+code{font-family:var(--mono);font-size:.85em;background:var(--bg3);padding:.1em .4em;border-radius:4px;color:var(--ink2)}
+.cap{font-family:var(--mono);font-size:.62rem;color:var(--light);text-transform:uppercase;letter-spacing:.08em;margin-top:.7rem;line-height:1.5}
+.viz{margin:2.4rem 0}
+.viz-row{margin-bottom:1rem}
+.viz-cap{font-family:var(--mono);font-size:.58rem;text-transform:uppercase;letter-spacing:.12em;color:var(--sub);margin-bottom:.45rem}
+.bar{display:flex;height:46px;border-radius:8px;overflow:hidden;gap:2px}
+.seg{display:flex;align-items:center;padding:0 .7rem;font-family:var(--mono);font-size:.6rem;white-space:nowrap;overflow:hidden;min-width:0;flex:0 1 0;flex-grow:var(--f);transition:flex-grow .9s cubic-bezier(.2,.7,.2,1)}
+body.anim .viz .seg{flex-grow:0}body.anim .viz.in .seg{flex-grow:var(--f)}
+.seg-dark{background:var(--ink2);color:#fff}.seg-light{background:var(--bg3);color:var(--sub)}.seg-teal{background:var(--teal);color:#fff}.seg-accent{background:var(--accent);color:#fff;font-weight:500}.seg-mut{background:var(--light);color:var(--ink)}
+.vbar{display:flex;align-items:center;gap:.9rem;margin-bottom:.6rem}
+.vbar-l{font-family:var(--mono);font-size:.58rem;color:var(--sub);width:108px;flex:none;text-align:right;text-transform:uppercase;letter-spacing:.05em;line-height:1.3}
+.vbar-t{flex:1;height:34px;background:var(--bg2);border-radius:6px;overflow:hidden}
+.vbar-f{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding:0 .65rem;font-family:var(--mono);font-size:.66rem;color:#fff;width:var(--w);transition:width 1s cubic-bezier(.2,.7,.2,1)}
+body.anim .viz .vbar-f{width:0}body.anim .viz.in .vbar-f{width:var(--w)}
+.vf-teal{background:var(--teal)}.vf-accent{background:var(--accent)}.vf-mut{background:var(--light);color:var(--ink2)}
+.cols{position:relative;display:flex;align-items:flex-end;gap:clamp(.4rem,2vw,1rem);height:200px;margin:2.4rem 0 .4rem;padding-top:1.4rem}
+.col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+.col-v{font-family:var(--mono);font-size:.66rem;color:var(--ink2);margin-bottom:.4rem}
+.col-bar{width:100%;max-width:54px;border-radius:5px 5px 0 0;background:var(--teal);height:var(--h);transition:height 1s cubic-bezier(.2,.7,.2,1)}
+.col-bar.over{background:var(--accent)}
+body.anim .viz .col-bar{height:0}body.anim .viz.in .col-bar{height:var(--h)}
+.line100{position:absolute;left:0;right:0;bottom:var(--y);border-top:1px dashed rgba(179,74,47,.45);pointer-events:none}
+.col-x-axis{display:flex;gap:clamp(.4rem,2vw,1rem)}
+.col-x-axis>span{flex:1;text-align:center;font-family:var(--mono);font-size:.56rem;color:var(--sub);letter-spacing:.04em}
+.callout{background:var(--teal-bg);border-left:2px solid var(--teal);border-radius:0 8px 8px 0;padding:1.1rem 1.3rem;margin:1.7rem 0;font-style:italic;color:var(--ink2)}
+.callout strong{font-style:normal}
+footer{border-top:1px solid var(--line);padding:2.5rem 0 4rem;font-family:var(--mono);font-size:.7rem;color:var(--sub)}
+footer a{font-size:1rem;font-family:var(--body)}.foot-row{display:flex;gap:1.5rem;flex-wrap:wrap;margin-top:.6rem}
+@media(max-width:560px){body{font-size:17px}header.post{padding:7rem 0 1.5rem}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-mark"><svg viewBox="0 0 200 48" width="110" height="28"><text x="0" y="38" font-family="'Bricolage Grotesque',sans-serif" font-weight="800" font-size="42" letter-spacing="-2" fill="#1a1714">ap<tspan fill="#b34a2f">eg</tspan></text></svg></a>
+  <div class="nav-links">
+    <a href="/#about">About</a>
+    <a href="/#specializations">Specializations</a>
+    <a href="/#agents">Agents</a>
+    <a href="/#systems">Systems</a>
+    <a href="/#stack">Stack</a>
+    <a href="/writing/running-gemma4-26b-on-a-cpu/">Writing</a>
+    <a href="/#contact">Contact</a>
+  </div>
+</nav>
+
+<div class="wrap">
+<header class="post">
+  <div class="eyebrow">Writing &middot; June 2026</div>
+  <h1 class="title">Running Gemma-4 26B at 124 tokens/sec on a CPU, no GPU</h1>
+  <p class="deck">A 26-billion-parameter model on a plain desktop with no graphics card. The recipe, and the map of where the walls actually are.</p>
+  <p class="byline">By Arun Prasath E G</p>
+</header>
+
+<article>
+<p class="lead">I wanted to see how fast a 26B mixture-of-experts model runs on a normal desktop with no graphics card. Just the CPU: an i9-13900K, 64GB of plain DDR5. I went looking because of a question that keeps deciding the architecture of the robot brain I'm building, how fast can a model think on hardware you don't rent. The answer turned into its own project.</p>
+<p>About <strong>40 tokens/sec</strong> single-stream, lossless, or about <strong>124</strong> if you batch a few requests. For a 26B model with no GPU, that's a little wild.</p>
+<p>One thing up front, because it surprised me. The instinct with a mixture of experts is to quantize the experts, that's where the parameters are. But I counted the bytes you actually read per token, and the experts are 16% of them. The output head, the projection to the 262K-token vocabulary, is 32%. For this model you compress the head, not the experts.</p>
+
+<h2>the setup</h2>
+<p>Gemma-4-26B-A4B is 26B parameters but only ~3.8B fire per token, because it's a mixture of experts: 128 of them, 8 used at a time. That sparsity is the only reason this fits on a CPU at all. And "lossless" here is literal, every trick either skips work the model would have thrown away, or guesses ahead and has the full model check the guess. The tokens that come out are exactly Q4_0's tokens, just faster. (One lever, running fewer experts, is an approximation; I'll show how I checked it.)</p>
+
+<h2>where the time goes</h2>
+<p>Plain Q4_0, one token at a time: 25 tokens/sec, and it didn't move whether I gave it 8 threads or 24. That's the tell. If cores don't help, you're waiting on memory.</p>
+<div class="eq">tokens/sec = memory bandwidth &divide; bytes read per token</div>
+<p>To make one token you read the active model out of RAM, once. Everything below is a fight over those two numbers: faster RAM, or fewer bytes.</p>
+
+<h2>two levers, almost free</h2>
+<p><strong>Speculative decoding.</strong> Gemma ships a small official drafter that guesses the next few tokens; the big model verifies them all in a single pass instead of one at a time. Good guesses mean several tokens per pass. That's 25 &rarr; 40 tok/s, still exactly lossless, the big model signs off on every token.</p>
+<p><strong>Running 3 of the 8 experts.</strong> This one nearly scared me off: perplexity on raw Wikipedia jumped 1.6x. But raw-text perplexity is meaningless for a chat model, it scores terribly there no matter what, and that broken regime blows small differences out of proportion. So I read the actual outputs instead, and top-3 and top-8 give the same answers on real prompts. Free speed, confirmed by looking rather than trusting the number.</p>
+
+<h2>the surprise: the head, not the experts</h2>
+<p>Then I stopped guessing and counted the bytes per token, straight from the model file. The thing people skip is that bytes-per-token is not size-on-disk. For a mixture of experts they're wildly different: you only read the experts that fire, 3 of 128, but you read the whole head on every token.</p>
+<figure class="viz">
+  <div class="viz-row">
+    <div class="viz-cap">share of all weights &middot; on disk</div>
+    <div class="bar"><span class="seg seg-dark" style="--f:88">experts &middot; ~88%</span><span class="seg seg-light" style="--f:12">rest</span></div>
+  </div>
+  <div class="viz-row">
+    <div class="viz-cap">bytes actually read &middot; per token</div>
+    <div class="bar"><span class="seg seg-teal" style="--f:52">always-on &middot; 52%</span><span class="seg seg-accent" style="--f:32">head &middot; 32%</span><span class="seg seg-mut" style="--f:16">experts &middot; 16%</span></div>
+  </div>
+  <figcaption class="cap">Experts: most of the model on disk, smallest slice per token. The head is the inverse, tiny on disk, read in full every step.</figcaption>
+</figure>
+<p>So the head is the thing to cut. It sits at 6.5 bits per weight; I dropped it to 2.4 and couldn't find any damage, same answers on every prompt. That's 606 MB down to 225 MB on the single most-read tensor in the model. 2.4 is the floor, not a step on the way down: at 1.75 bits it got <em>slower</em>, more time unpacking the tighter format than saved reading it, and the output started looping in the arithmetic.</p>
+
+<h2>what didn't work</h2>
+<p>Two dead-ends, left in because they're the useful part. First, quantizing harder is supposed to compound. A 32%-smaller model <em>is</em> 18% faster on plain decode. But stack it with speculative decoding and it buys exactly nothing, both fight memory bandwidth and spec already won it. (I logged a 43.6 once, got excited, re-ran it, noise around 41.) Second, you can't shrink the experts much anyway, their down-projection width doesn't fit the low-bit block formats, so they fall back to 4 bits. Doesn't matter, they're 16% of the bytes; forcing it would buy about 5%.</p>
+
+<h2>the wall, and the way around it</h2>
+<p>Is 40 a real wall or a lazy engine? I measured the RAM's actual bandwidth and how much decode uses of it.</p>
+<figure class="viz">
+  <div class="vbar"><div class="vbar-l">DDR5-4800<br>on paper</div><div class="vbar-t"><div class="vbar-f vf-mut" style="--w:100%">76.8 GB/s</div></div></div>
+  <div class="vbar"><div class="vbar-l">actually<br>achievable</div><div class="vbar-t"><div class="vbar-f vf-teal" style="--w:84%">64.5 GB/s</div></div></div>
+  <div class="vbar"><div class="vbar-l">decode<br>uses</div><div class="vbar-t"><div class="vbar-f vf-accent" style="--w:62%">~48 GB/s</div></div></div>
+  <figcaption class="cap">Decode already runs at ~78% of what the RAM can deliver. Pinning threads, core counts, more quant, none of it moved that. The gap is how a MoE reads memory, scattered, not laziness.</figcaption>
+</figure>
+<p>So single-stream is genuinely near the wall. But the equation is per token, for <em>one</em> stream. Serve a few at once and you read each weight once for all of them, the matmul turns from a vector into a matrix, and the bottleneck moves from memory to compute, the cores that sat idle finally have work.</p>
+<figure class="viz">
+  <div class="cols">
+    <div class="col"><div class="col-v">28</div><div class="col-bar" style="--h:19%"></div></div>
+    <div class="col"><div class="col-v">69</div><div class="col-bar" style="--h:48%"></div></div>
+    <div class="col"><div class="col-v">81</div><div class="col-bar" style="--h:56%"></div></div>
+    <div class="col"><div class="col-v">114</div><div class="col-bar over" style="--h:79%"></div></div>
+    <div class="col"><div class="col-v">124</div><div class="col-bar over" style="--h:85%"></div></div>
+  </div>
+  <div class="col-x-axis"><span>batch 1</span><span>4</span><span>8</span><span>16</span><span>32</span></div>
+  <figcaption class="cap">Aggregate tok/s by batch size. It crosses 100 at batch 16 and climbs to 124. Single-stream, meanwhile, never moves off ~40.</figcaption>
+</figure>
+<p>It crosses 100 at batch 16. And where threads did nothing for single-stream, here they help, batch-16 goes from 93 at eight threads to 114 at twenty-four, because now it's compute-bound. Same chip, two different limits. This is continuous batching, the trick vLLM made famous on GPUs; it just isn't usually pointed at a CPU. The catch is it's aggregate, not per-stream, at batch 32 each request gets about 4 tok/s. Right for a server with concurrent load, wrong for one person waiting on one answer.</p>
+
+<h2>where it lands</h2>
+<figure class="viz">
+  <div class="vbar"><div class="vbar-l">single-stream<br>latency</div><div class="vbar-t"><div class="vbar-f vf-teal" style="--w:32%">~40 tok/s</div></div></div>
+  <div class="vbar"><div class="vbar-l">aggregate<br>throughput</div><div class="vbar-t"><div class="vbar-f vf-accent" style="--w:100%">~124 tok/s</div></div></div>
+</figure>
+<p>100 on a no-GPU desktop is done, as throughput. Single-stream sits at 40 because that's where the memory bus tops out, and pushing past it there is a hardware question, faster RAM or more memory channels, not a software one. Two ceilings, 3x apart, on the same chip.</p>
+<div class="callout"><strong>None of the pieces are mine.</strong> Speculative decoding off Google's drafter, the low-bit kernels from ik_llama.cpp, all on llama.cpp. What I did was measure where the walls are, dead-ends and all, and write it down.</div>
+<p>It all runs on public models, and the recipe, every number, and the scripts to reproduce it on your own machine are on GitHub: <a href="https://github.com/arun-prasath2005/gemma4-cpu-moe">arun-prasath2005/gemma4-cpu-moe</a>.</p>
+</article>
+
+<footer>
+  Arun Prasath E G
+  <div class="foot-row"><a href="/">apeg.dev</a><a href="https://github.com/arun-prasath2005/gemma4-cpu-moe">code &amp; full numbers</a></div>
+</footer>
+</div>
+<script>
+(function(){document.body.classList.add('anim');
+var io=new IntersectionObserver(function(es,o){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');o.unobserve(e.target)}})},{threshold:.25});
+document.querySelectorAll('.viz').forEach(function(el){io.observe(el)})})();
+</script>
+</body>
+</html>
