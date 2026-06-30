@@ -287,15 +287,15 @@ body{
 /* hero photo */
 .hero-photo{position:relative}
 .hero-img-wrap{
-  position:relative;border-radius:14px;overflow:hidden;
+  position:relative;border-radius:14px;
   box-shadow:0 8px 40px rgba(26,23,20,.1),0 1px 3px rgba(26,23,20,.06);
 }
 .hero-img{
   display:block;width:100%;aspect-ratio:3/4;
-  object-fit:cover;object-position:center 15%;
+  object-fit:cover;object-position:center 15%;border-radius:14px;
 }
-/* decorative offset frame */
-.hero-photo::after{
+/* decorative offset frame — behind the photo only */
+.hero-img-wrap::after{
   content:'';position:absolute;
   top:12px;left:12px;right:-12px;bottom:-12px;
   border:1.5px solid var(--line2);border-radius:14px;z-index:-1;
@@ -511,7 +511,7 @@ body{
   .hero{min-height:auto;padding-top:5rem;padding-bottom:3rem}
   .hero-inner{grid-template-columns:1fr 200px;gap:2rem}
   .hero-photo{max-width:200px}
-  .hero-photo::after{display:none}
+  .hero-img-wrap::after{display:none}
   .hero-img{aspect-ratio:1/1;border-radius:50%}
   .hero-img-wrap{border-radius:50%;box-shadow:0 4px 20px rgba(26,23,20,.08)}
   .hero-photo-name,.hero-photo-title{font-size:.7rem;margin-top:1rem}
@@ -543,7 +543,7 @@ body{
   .hero-sub{font-size:.92rem}
   .hero-img{aspect-ratio:1/1;border-radius:50%}
   .hero-img-wrap{border-radius:50%;box-shadow:0 4px 20px rgba(26,23,20,.08)}
-  .hero-photo::after{display:none}
+  .hero-img-wrap::after{display:none}
   .nav-links{display:none}
   .nav{padding:0 1.25rem}
   .sec{padding:clamp(3rem,8vw,5rem) 1.25rem}
