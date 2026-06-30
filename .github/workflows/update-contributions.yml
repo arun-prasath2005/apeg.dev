@@ -46,7 +46,7 @@ jobs:
 
           sed -i "s/const data=\[.*\];/const data=[$COUNTS];/" index.html
           sed -i "s/const dates=\[.*\];/const dates=[$DATES];/" index.html
-          sed -i "s/[0-9,]\+ this year\"/${TOTAL_FMT} this year\"/g" index.html
+          sed -i "s/>[0-9,]\+ this year</>${TOTAL_FMT} this year</g" index.html
 
       - name: Commit and push if changed
         run: |
