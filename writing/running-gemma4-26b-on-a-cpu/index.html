@@ -42,11 +42,11 @@ a:hover{border-color:var(--accent)}
 .nav-links a{font-family:var(--mono);font-size:.68rem;color:var(--sub);border:none;padding:.4rem .8rem;border-radius:6px;transition:all .25s}
 .nav-links a:hover{color:var(--ink);background:var(--line)}
 @media(max-width:640px){.nav-links{display:none}}
-.wrap{max-width:716px;margin:0 auto;padding:0 clamp(1.5rem,5vw,2rem)}
+.wrap{max-width:920px;margin:0 auto;padding:0 clamp(1.5rem,5vw,2rem)}
 header.post{padding:8.5rem 0 2rem}
 .eyebrow{font-family:var(--mono);font-size:.6rem;font-weight:500;color:var(--accent);letter-spacing:.16em;text-transform:uppercase;margin-bottom:1.4rem}
-h1.title{font-family:var(--display);font-weight:800;font-size:clamp(2.1rem,5vw,3.1rem);line-height:1.04;letter-spacing:-.035em;color:var(--ink);margin-bottom:1.3rem}
-.deck{font-weight:400;font-size:1.15rem;line-height:1.5;color:var(--text);max-width:48ch}
+h1.title{font-family:var(--display);font-weight:800;font-size:clamp(2rem,5vw,3.05rem);line-height:1.06;letter-spacing:-.035em;color:var(--ink);margin-bottom:1.3rem}
+.deck{font-weight:400;font-size:1.2rem;line-height:1.5;color:var(--text)}
 .byline{font-family:var(--mono);font-size:.64rem;color:var(--sub);letter-spacing:.08em;text-transform:uppercase;margin-top:1.5rem}
 article{padding-bottom:4rem}
 article p{margin:0 0 1.35rem}
@@ -79,6 +79,8 @@ body.anim .viz .col-bar{height:0}body.anim .viz.in .col-bar{height:var(--h)}
 .col-x-axis{display:flex;gap:clamp(.4rem,2vw,1rem)}
 .col-x-axis>span{flex:1;text-align:center;font-family:var(--mono);font-size:.56rem;color:var(--sub);letter-spacing:.04em}
 .eyebrow,.byline,.viz-cap,.cap,.seg,.vbar-l,.vbar-f,.col-v,.col-x-axis>span{font-family:var(--label)}
+.demo{margin:2.8rem 0}
+.demo-vid{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line2);background:#0c0c0c;box-shadow:0 16px 40px -20px rgba(17,17,17,.4)}
 .callout{background:var(--teal-bg);border-left:2px solid var(--teal);border-radius:0 8px 8px 0;padding:1.1rem 1.3rem;margin:1.7rem 0;font-style:italic;color:var(--ink2)}
 .callout strong{font-style:normal}
 footer{border-top:1px solid var(--line);padding:2.5rem 0 4rem;font-family:var(--mono);font-size:.7rem;color:var(--sub)}
@@ -113,6 +115,14 @@ footer a{font-size:1rem;font-family:var(--body)}.foot-row{display:flex;gap:1.5re
 <p class="lead">I wanted to see how fast a 26B mixture-of-experts model runs on a normal desktop with no graphics card. Just the CPU: an i9-13900K, 64GB of plain DDR5. I went looking because of a question that keeps deciding the architecture of the robot brain I'm building, how fast can a model think on hardware you don't rent. The answer turned into its own project.</p>
 <p>About <strong>40 tokens/sec</strong> single-stream, lossless, or about <strong>124</strong> if you batch a few requests. For a 26B model with no GPU, that's a little wild.</p>
 <p>One thing up front, because it surprised me. The instinct with a mixture of experts is to quantize the experts, that's where the parameters are. But I counted the bytes you actually read per token, and the experts are 16% of them. The output head, the projection to the 262K-token vocabulary, is 32%. For this model you compress the head, not the experts.</p>
+
+<figure class="demo">
+  <video class="demo-vid" poster="demo-poster.jpg" controls muted loop playsinline preload="none"
+         aria-label="Terminal recording: Gemma-4 26B running on an i9-13900K CPU with no GPU. One stream generating, then a batched throughput sweep.">
+    <source data-src="demo.mp4" type="video/mp4">
+  </video>
+  <figcaption class="cap">The run itself, on the i9 &mdash; one stream generating live, then the batched sweep filling in past 120 tok/s. No GPU, and the closing numbers are measured from this very run.</figcaption>
+</figure>
 
 <h2>the setup</h2>
 <p>Gemma-4-26B-A4B is 26B parameters but only ~3.8B fire per token, because it's a mixture of experts: 128 of them, 8 used at a time. That sparsity is the only reason this fits on a CPU at all. And "lossless" here is literal, every trick either skips work the model would have thrown away, or guesses ahead and has the full model check the guess. The tokens that come out are exactly Q4_0's tokens, just faster. (One lever, running fewer experts, is an approximation; I'll show how I checked it.)</p>
@@ -185,6 +195,10 @@ footer a{font-size:1rem;font-family:var(--body)}.foot-row{display:flex;gap:1.5re
 (function(){document.body.classList.add('anim');
 var io=new IntersectionObserver(function(es,o){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');o.unobserve(e.target)}})},{threshold:.25});
 document.querySelectorAll('.viz').forEach(function(el){io.observe(el)})})();
+(function(){var v=document.querySelector('.demo-vid');if(!v)return;var s=v.querySelector('source[data-src]');
+var io=new IntersectionObserver(function(es){es.forEach(function(e){
+if(e.isIntersecting){if(s&&!s.src){s.src=s.getAttribute('data-src');v.load();}v.play().catch(function(){});}else{v.pause();}
+})},{threshold:.25});io.observe(v);})();
 </script>
 </body>
 </html>
